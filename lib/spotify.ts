@@ -3,9 +3,10 @@ import { cookies } from 'next/headers';
 
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID!;
 const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET!;
+const FALLBACK_REDIRECT = process.env.SPOTIFY_REDIRECT_URI || ''; // fallback only
 const REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI!; // must match on Spotify dashboard
 const IS_PROD = process.env.NODE_ENV === 'production';
-const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined; // e.g. ".ashlynl.com"
+const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined;
 const PREFIX = process.env.SPOTIFY_COOKIE_PREFIX ?? 'sp';
 
 export const COOKIE_REFRESH = `${PREFIX}_refresh`;
@@ -21,20 +22,22 @@ function getCookie(name: string) {
 }
 
 /** Build the user consent URL */
-export function buildAuthorizeURL() {
+export function buildAuthorizeURL(redirectUri?: string) {
   const scopes = [
     'user-read-currently-playing',
     'user-read-playback-state',
   ].join(' ');
 
+  const finalRedirect = redirectUri || FALLBACK_REDIRECT;
+  if (!finalRedirect) throw new Error('Missing redirect URI');
+
   const url = new URL('https://accounts.spotify.com/authorize');
   url.searchParams.set('client_id', CLIENT_ID);
   url.searchParams.set('response_type', 'code');
-  url.searchParams.set('redirect_uri', REDIRECT_URI);
+  url.searchParams.set('redirect_uri', finalRedirect);
   url.searchParams.set('scope', scopes);
   return url.toString();
 }
-
 /** Set cookies on the *response* we return (safe for prod) */
 export function applyTokensToResponse(
   res: NextResponse,
@@ -82,17 +85,20 @@ export function tokenExpired() {
   return !exp || now >= exp;
 }
 
-export async function exchangeCodeForTokens(code: string) {
+export async function exchangeCodeForTokens(code: string, redirectUri?: string) {
+  const finalRedirect = redirectUri || FALLBACK_REDIRECT;
+  if (!finalRedirect) throw new Error('Missing redirect URI');
+
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
     code,
-    redirect_uri: REDIRECT_URI,
+    redirect_uri: finalRedirect,
   });
 
   const res = await fetch('https://accounts.spotify.com/api/token', {
     method: 'POST',
     headers: {
-      Authorization: `Basic ${b64(`${CLIENT_ID}:${CLIENT_SECRET}`)}`,
+      Authorization: `Basic ${Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64')}`,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body,
