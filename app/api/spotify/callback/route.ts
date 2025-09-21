@@ -1,17 +1,34 @@
 import { NextResponse } from 'next/server';
-import { ensureAccessToken, getNowPlaying } from '@/lib/spotify';
+import { exchangeCodeForTokens, applyTokensToResponse } from '@/lib/spotify';
 
-export const dynamic = 'force-dynamic'; // avoid caching in dev & prod
+export async function GET(req: Request) {
+  const url = new URL(req.url);
+  const code = url.searchParams.get('code');
+  const error = url.searchParams.get('error');
 
-export async function GET() {
+  if (error) {
+    return new NextResponse(`Spotify error: ${error}`, { status: 400 });
+  }
+  if (!code) {
+    return new NextResponse('Missing authorization code.', { status: 400 });
+  }
+
   try {
-    const token = await ensureAccessToken();
-    if (!token) {
-      return NextResponse.json({ playing: false, error: 'not_authed' }, { status: 200 });
-    }
-    const data = await getNowPlaying(token);
-    return NextResponse.json(data, { status: 200 });
+    const tokens = await exchangeCodeForTokens(code);
+
+    // redirect home
+    const dest = new URL('/?authed=1', url);
+    const res = NextResponse.redirect(dest, { status: 302 });
+
+    // **set cookies on the response we return**
+    applyTokensToResponse(res, {
+      access_token: tokens.access_token,
+      refresh_token: tokens.refresh_token,
+      expires_in: tokens.expires_in,
+    });
+
+    return res;
   } catch (e: any) {
-    return NextResponse.json({ error: String(e?.message ?? e) }, { status: 500 });
+    return new NextResponse(String(e?.message ?? e), { status: 500 });
   }
 }
