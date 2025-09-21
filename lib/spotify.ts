@@ -1,20 +1,17 @@
-import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
 
-// === CONFIG ===
 const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID!;
 const CLIENT_SECRET = process.env.SPOTIFY_CLIENT_SECRET!;
-const REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI!; // must match Spotify dashboard
+const REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI!; // must match on Spotify dashboard
 const IS_PROD = process.env.NODE_ENV === 'production';
 const COOKIE_DOMAIN = process.env.COOKIE_DOMAIN || undefined; // e.g. ".ashlynl.com"
-
 const PREFIX = process.env.SPOTIFY_COOKIE_PREFIX ?? 'sp';
 
 export const COOKIE_REFRESH = `${PREFIX}_refresh`;
-export const COOKIE_ACCESS = `${PREFIX}_access`;
-export const COOKIE_EXP = `${PREFIX}_exp`; // epoch seconds
+export const COOKIE_ACCESS  = `${PREFIX}_access`;
+export const COOKIE_EXP     = `${PREFIX}_exp`;
 
-// === HELPERS ===
 function b64(x: string) {
   return Buffer.from(x).toString('base64');
 }
@@ -23,18 +20,29 @@ function getCookie(name: string) {
   return cookies().get(name)?.value;
 }
 
-// === COOKIE MANAGEMENT ===
+/** Build the user consent URL */
+export function buildAuthorizeURL() {
+  const scopes = [
+    'user-read-currently-playing',
+    'user-read-playback-state',
+  ].join(' ');
+
+  const url = new URL('https://accounts.spotify.com/authorize');
+  url.searchParams.set('client_id', CLIENT_ID);
+  url.searchParams.set('response_type', 'code');
+  url.searchParams.set('redirect_uri', REDIRECT_URI);
+  url.searchParams.set('scope', scopes);
+  return url.toString();
+}
+
+/** Set cookies on the *response* we return (safe for prod) */
 export function applyTokensToResponse(
   res: NextResponse,
   {
     access_token,
     refresh_token,
     expires_in,
-  }: {
-    access_token: string;
-    refresh_token?: string;
-    expires_in: number;
-  }
+  }: { access_token: string; refresh_token?: string; expires_in: number }
 ) {
   const now = Math.floor(Date.now() / 1000);
   const exp = now + Math.max(1, Math.floor(expires_in * 0.9));
@@ -47,19 +55,15 @@ export function applyTokensToResponse(
     ...(COOKIE_DOMAIN ? { domain: COOKIE_DOMAIN } : {}),
   };
 
-  // access + exp
   res.cookies.set(COOKIE_ACCESS, access_token, base);
   res.cookies.set(COOKIE_EXP, String(exp), base);
 
   if (refresh_token) {
     res.cookies.set(COOKIE_REFRESH, refresh_token, {
       ...base,
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      maxAge: 60 * 60 * 24 * 30,
     });
   }
-
-  // Optional debug cookie (non-httpOnly, visible in browser)
-  res.cookies.set('sp_probe', '1', { path: '/', secure: IS_PROD });
 }
 
 export function clearTokens(res: NextResponse) {
@@ -78,7 +82,6 @@ export function tokenExpired() {
   return !exp || now >= exp;
 }
 
-// === SPOTIFY TOKEN CALLS ===
 export async function exchangeCodeForTokens(code: string) {
   const body = new URLSearchParams({
     grant_type: 'authorization_code',
@@ -126,11 +129,9 @@ export async function refreshAccessToken(refreshToken: string) {
   return res.json();
 }
 
-// === TOKEN ENSURER ===
 export async function ensureAccessToken(): Promise<string | null> {
   let access = getCookie(COOKIE_ACCESS);
   const refresh = getRefreshToken();
-
   if (!refresh) return null;
 
   if (!access || tokenExpired()) {
@@ -140,16 +141,13 @@ export async function ensureAccessToken(): Promise<string | null> {
   return access || null;
 }
 
-// === API CALLS ===
 export async function getNowPlaying(accessToken: string) {
   const res = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
     headers: { Authorization: `Bearer ${accessToken}` },
     cache: 'no-store',
   });
 
-  if (res.status === 204) {
-    return { playing: false };
-  }
+  if (res.status === 204) return { playing: false };
   if (!res.ok) {
     const txt = await res.text();
     throw new Error(`now playing failed: ${res.status} ${txt}`);
@@ -164,9 +162,3 @@ export async function getNowPlaying(accessToken: string) {
     url: json.item?.external_urls?.spotify,
   };
 }
-
-// === SCOPES ===
-export const SCOPES = [
-  'user-read-currently-playing',
-  'user-read-playback-state',
-].join(' ');
