@@ -514,3 +514,50 @@ footer.site-footer {
   font-size: 11px;
   color: var(--muted);
 }
+
+
+.nowplaying{
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.np-link{ text-decoration: none; display:inline-flex; align-items:center; }
+.np-link.disabled{ pointer-events: none; cursor: default; }
+
+.np-disc{
+  display:inline-block;
+  font-size: 18px;
+  line-height: 1;
+  transform-origin: 50% 50%;
+  filter: drop-shadow(0 1px 0 rgba(0,0,0,.06));
+  transition: transform .2s ease;
+}
+.np-disc:hover{ transform: scale(1.08); }
+
+@keyframes np-spin { to { transform: rotate(360deg); } }
+.np-disc.spin{ animation: np-spin 3.2s linear infinite; }
+
+.np-tooltip{
+  position:absolute;
+  left: 26px;
+  top: 50%;
+  transform: translateY(-50%) translateX(6px);
+  display: none;
+  white-space: nowrap;
+  background: rgba(255,255,255,.95);
+  border: 1px solid var(--rule);
+  padding: 6px 8px;
+  border-radius: 6px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  z-index: 5;
+  font: 600 11px/1 "IBM Plex Mono", monospace;
+  color: var(--ink);
+}
+.np-tooltip.show{ display:flex; align-items:center; }
+.np-tooltip .np-title{ font-weight: 700; }
+.np-tooltip .np-artist{ opacity:.8; }
+.np-tooltip .np-muted{ color: var(--muted); }

@@ -1,6 +1,6 @@
-import NowPlayingBadge from '@/components/NowPlayingBadge';
-import FancyTitle from '../components/FancyTitle';
-import SmartLink from '../components/SmartLink';
+import DiskNowplaying from '@/components/DiskNowPlaying';
+import TitleBump from '@/components/TitleBump';
+import SmartLink from '@/components/SmartLink';
 
 // will switch to postgres later
 const projects = [
@@ -42,11 +42,12 @@ export default function Page(){
     <div className="hero-title">
       <p className="intro-eyebrow">HEY! I’M</p>
 
-      <FancyTitle text="Ashlyn Lee" />
+      <TitleBump text="Ashlyn Lee" />
     </div>
     <p className="tagline">Rocketry • Avionics • Control •• Engineering Science @ UofT</p>
     <p className="tagline"></p>
-    <NowPlayingBadge/>
+    <DiskNowplaying/>
+
   </div>
 </section>
     <br></br><br></br><br></br>

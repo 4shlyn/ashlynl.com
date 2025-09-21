@@ -1,6 +1,5 @@
 {
-  "/api/now-playing/route": "app/api/now-playing/route.js",
-  "/page": "app/page.js",
-  "/projects/[slug]/page": "app/projects/[slug]/page.js",
-  "/blog/page": "app/blog/page.js"
+  "/_not-found/page": "app/_not-found/page.js",
+  "/api/spotify/nowplaying/route": "app/api/spotify/nowplaying/route.js",
+  "/page": "app/page.js"
 }

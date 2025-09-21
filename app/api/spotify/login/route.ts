@@ -1,14 +1,20 @@
+import { NextResponse } from 'next/server';
+import { SCOPES } from '@/lib/spotify';
+
+const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID!;
+const REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI!;
+
 export async function GET() {
   const params = new URLSearchParams({
-    client_id: process.env.SPOTIFY_CLIENT_ID,
+    client_id: CLIENT_ID,
     response_type: 'code',
-    redirect_uri: 'http://localhost:3000/api/spotify/callback',
-    scope: [
-      'user-read-currently-playing',
-      'user-read-playback-state'
-    ].join(' '),
+    redirect_uri: REDIRECT_URI,
+    scope: SCOPES,
+    // show the consent dialog so we definitely get a refresh_token the first time
     show_dialog: 'true',
   });
 
-  return Response.redirect('https://accounts.spotify.com/authorize?' + params.toString(), 302);
+  return NextResponse.redirect(
+    'https://accounts.spotify.com/authorize?' + params.toString()
+  );
 }
