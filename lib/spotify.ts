@@ -1,3 +1,4 @@
+// lib/spotify.ts
 import { cookies } from 'next/headers';
 
 export const CLIENT_ID = process.env.SPOTIFY_CLIENT_ID!;
