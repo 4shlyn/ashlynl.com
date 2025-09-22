@@ -1,12 +1,13 @@
-import DiskNowplaying from '@/components/DiskNowPlaying';
+import DiskNowPlaying from '@/components/DiskNowPlaying';
 import TitleBump from '@/components/TitleBump';
 import SmartLink from '@/components/SmartLink';
+import ScrollHint from "@/components/ScrollHint";
 
 // will switch to postgres later
 const projects = [
   {
     slug: "srad-flight-computer",
-    title: "SRAD Flight Computer, Dual‑Deploy",
+    title: "SRAD Flight Computer, Dual-Deploy",
     desc: "Custom Teensy flight computer with IMU + baro sensors and EKF altitude/velocity for state estimation and reliable apogee and main deployment.",
     image: "/assets/watercolor1.png",
     tag: "Avionics"
@@ -34,24 +35,32 @@ const projects = [
   }
 ];
 
-export default function Page(){
+export default function Page() {
   return (
     <>
-   <section className="hero">
-  <div className="hero-inner">
-    <div className="hero-title">
-      <p className="intro-eyebrow">HEY! I’M</p>
+      <section className="hero">
+        <div className="hero-inner">
+          <div className="hero-title">
+            <p className="intro-eyebrow">HEY! I’M</p>
+            <TitleBump text="Ashlyn Lee" />
+          </div>
+          <p className="tagline">
+            Rocketry • Avionics • Control •• Engineering Science @ UofT
+          </p>
 
-      <TitleBump text="Ashlyn Lee" />
-    </div>
-    <p className="tagline">Rocketry • Avionics • Control •• Engineering Science @ UofT</p>
-    <p className="tagline"></p>
-    <DiskNowplaying/>
+          <div className="mt-4">
+            <DiskNowPlaying />
+            
+          </div>
 
-  </div>
-</section>
-    <br></br><br></br><br></br>
-      <p>site is still in progress.. feel free to contact me if you experience any bugs or have feedback!</p>
+        </div>
+      </section>
+
+      <br /><br /><br /><br></br><br></br><br></br>
+      <p>
+        site is still in progress.. feel free to contact me if you experience any bugs or have feedback!
+      </p>
+          <ScrollHint targetId="projects-list" />
 
       <section className="projects-mb">
         <div className="kicker">Projects</div>
@@ -63,7 +72,9 @@ export default function Page(){
               </div>
               <div className="copy">
                 <span className="eyebrow">{p.tag}</span>
-                <h3><SmartLink href={`/projects/${p.slug}`}>{p.title}</SmartLink></h3>
+                <h3>
+                  <SmartLink href={`/projects/${p.slug}`}>{p.title}</SmartLink>
+                </h3>
                 <p>{p.desc}</p>
               </div>
             </article>
@@ -71,5 +82,5 @@ export default function Page(){
         </div>
       </section>
     </>
-  )
+  );
 }

@@ -1,26 +1,40 @@
-// app/api/spotify/callback/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { exchangeCodeForTokens, applyTokensToResponse } from '@/lib/spotify';
+import { NextResponse } from "next/server";
 
-export async function GET(req: NextRequest) {
-  const url = new URL(req.url);
-  const code = url.searchParams.get('code');
-  const error = url.searchParams.get('error');
-
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const code = searchParams.get("code");
+  const error = searchParams.get("error");
   if (error) return new NextResponse(`Spotify error: ${error}`, { status: 400 });
-  if (!code) return new NextResponse('Missing authorization code.', { status: 400 });
+  if (!code) return new NextResponse("Missing code", { status: 400 });
 
-  const redirectUri = req.cookies.get('sp_cb')?.value;
-  if (!redirectUri) return new NextResponse('Missing redirect cookie', { status: 400 });
-
-  const tokens = await exchangeCodeForTokens(code, redirectUri);
-
-  const res = NextResponse.redirect(new URL('/?authed=1', url), { status: 302 });
-  applyTokensToResponse(res, {
-    access_token: tokens.access_token,
-    refresh_token: tokens.refresh_token,
-    expires_in: tokens.expires_in,
+  const body = new URLSearchParams({
+    grant_type: "authorization_code",
+    code,
+    redirect_uri: process.env.SPOTIFY_REDIRECT_URI!,
+    client_id: process.env.SPOTIFY_CLIENT_ID!,
+    client_secret: process.env.SPOTIFY_CLIENT_SECRET!,
   });
-  res.cookies.delete('sp_cb'); // clean up
-  return res;
+
+  const tokenRes = await fetch("https://accounts.spotify.com/api/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body,
+    // Node fetch; no need for cache here
+  });
+
+  if (!tokenRes.ok) {
+    const txt = await tokenRes.text();
+    return new NextResponse(`Token exchange failed: ${txt}`, { status: 400 });
+  }
+  const tokenJson = await tokenRes.json();
+
+  // You’ll get access_token (short-lived) and refresh_token (long-lived).
+  // Copy refresh_token into SPOTIFY_REFRESH_TOKEN in your .env.local.
+  const refresh = tokenJson.refresh_token;
+
+  // Show it plainly so you can copy it once.
+  return new NextResponse(
+    `Copy this refresh token into your .env.local as SPOTIFY_REFRESH_TOKEN:\n\n${refresh}\n\n(Then remove /api/spotify/login and /api/spotify/callback if you like.)`,
+    { status: 200, headers: { "Content-Type": "text/plain; charset=utf-8" } }
+  );
 }

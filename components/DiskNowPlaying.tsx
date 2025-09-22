@@ -1,122 +1,146 @@
-'use client';
-// WOOOOO IT WORKS
-import { useEffect, useState } from 'react';
-import useSWR from 'swr';
+"use client";
 
-const fetcher = async (url: string) => {
-  const res = await fetch(url, { cache: 'no-store', credentials: 'same-origin' });
-  const text = await res.text();
-  let json: any = null;
-  try { json = JSON.parse(text); } catch { /* not JSON */ }
-  return { ok: res.ok, status: res.status, statusText: res.statusText, data: json ?? text };
+import { useEffect, useRef, useState } from "react";
+
+type NowPlaying = {
+  isPlaying: boolean;
+  title?: string | null;
+  artist?: string | null;
+  albumImageUrl?: string | null;
+  songUrl?: string | null;
+  error?: string;
 };
 
+const POLL_MS = 15000; // background refresh
+
 export default function DiskNowPlaying() {
-  const [endpoint, setEndpoint] = useState<string | null>(null);
+  const [hovered, setHovered] = useState(false);
+  const [data, setData] = useState<NowPlaying | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const timerRef = useRef<number | null>(null);
 
-  //ABS URL 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setEndpoint(`${window.location.origin}/api/spotify/nowplaying`);
+  async function fetchNowPlaying() {
+    try {
+      const res = await fetch("/api/spotify/nowplaying", { cache: "no-store" });
+      const json = (await res.json()) as NowPlaying;
+      setData(json);
+    } finally {
+      setLoaded(true);
     }
-  }, []);
-
-  const { data, isLoading, mutate } = useSWR(endpoint, fetcher, {
-    refreshInterval: 10_000,
-    revalidateOnFocus: false,
-    dedupingInterval: 0,
-  });
-
-  //derived states
-  const apiOk = data?.ok === true;
-  const api404 = data?.status === 404;
-  const notAuthed = apiOk && data?.data?.error === 'not_authed';
-  const playing = apiOk && data?.data?.playing === true;
-
-  let tooltip = 'Loading…';
-  if (api404) {
-    tooltip =
-      'API 404: /api/spotify/nowplaying not found.\n' +
-      'Check file path: app/api/spotify/nowplaying/route.ts\n' +
-      'Then restart `npm run dev`.';
-  } else if (!apiOk && data) {
-    tooltip = `Spotify error: ${data.status} ${data.statusText}`;
-  } else if (notAuthed) {
-    tooltip = 'Connect Spotify';
-  } else if (apiOk && !playing) {
-    tooltip = 'Not playing';
-  } else if (apiOk && playing) {
-    const t = data?.data?.title ?? '—';
-    const a = data?.data?.artist ?? '';
-    tooltip = a ? `${t} — ${a}` : t;
   }
 
-  const href = notAuthed ? '/api/spotify/login' : (data?.data?.url ?? '#');
+  useEffect(() => {
+    fetchNowPlaying();
+    timerRef.current = window.setInterval(fetchNowPlaying, POLL_MS);
+    const onVis = () => document.visibilityState === "visible" && fetchNowPlaying();
+    document.addEventListener("visibilitychange", onVis);
+    return () => {
+      if (timerRef.current) window.clearInterval(timerRef.current);
+      document.removeEventListener("visibilitychange", onVis);
+    };
+  }, []);
+
+  const isPlaying = !!data?.isPlaying;
+  const label =
+    !loaded
+      ? "Loading…"
+      : isPlaying && data?.title
+      ? `${data.title} — ${data.artist ?? ""}`.trim()
+      : "Not playing";
 
   return (
-    <div className="np-wrap" aria-label="Now Playing" title="">
-      <a
-        href={href}
-        target={notAuthed ? '_self' : '_blank'}
-        rel={notAuthed ? undefined : 'noreferrer'}
-        className={`disk ${playing ? 'spin' : ''} ${isLoading ? 'dim' : ''}`}
-        onClick={(e) => {
-          if (!notAuthed && !data?.data?.url) e.preventDefault();
-        }}
+    <span
+      className="np-rel"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      aria-live="polite"
+    >
+      {/* Disk spins whenever music is playing */}
+      <span
+        className="disk"
+        style={{ animation: isPlaying ? "np-spin 3s linear infinite" : "none" }}
+        aria-hidden
       >
-        <span role="img" aria-label="disc">💿</span>
-      </a>
+        💿
+      </span>
 
-      <div className="tooltip">
-        {tooltip.split('\n').map((line, i) => <div key={i}>{line}</div>)}
-      </div>
+      {/* ABSOLUTE popover so layout never shifts */}
+      {hovered && (
+        <span className="popover">
+          {isPlaying && data?.albumImageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img className="thumb" src={data.albumImageUrl} alt="" />
+          ) : null}
 
+          {isPlaying && data?.songUrl ? (
+            <a className="title" href={data.songUrl} target="_blank" rel="noreferrer">
+              {label}
+            </a>
+          ) : (
+            <span className="muted">{label}</span>
+          )}
+        </span>
+      )}
+
+      {/* Scoped styles */}
       <style jsx>{`
-        .np-wrap {
-          position: relative;
-          display: inline-flex;
-          align-items: center;
-          gap: 10px;
-          margin-left: 10px;
+        .np-rel {
+          position: relative;               /* anchor for absolute popover */
+          display: inline-block;
+          line-height: 1;                   /* keeps the wrapper tight */
         }
         .disk {
-          display: inline-grid;
-          place-items: center;
-          width: 22px;
-          height: 22px;
-          border-radius: 50%;
-          text-decoration: none;
-          user-select: none;
-          will-change: transform;
-          transition: transform 200ms ease, opacity 200ms ease;
+          display: inline-block;
+          font-size: 18px;                  /* compact emoji */
+          transform-origin: 50% 50%;
         }
-        .disk.dim { opacity: 0.65; }
-        .disk:hover { transform: scale(1.08); }
-        .spin { animation: spin 2.4s linear infinite; }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .tooltip {
+
+        /* Popover styles (does NOT affect layout) */
+        .popover {
           position: absolute;
-          left: 28px;
+          left: 26px;                       /* ~ disk width + gap */
           top: 50%;
           transform: translateY(-50%);
-          padding: 6px 8px;
-          font: 600 11px/1.2 "IBM Plex Mono", monospace;
-          letter-spacing: .04em;
-          color: #222;
-          background: rgba(255,255,255,0.85);
-          border: 1px solid rgba(0,0,0,.1);
-          border-radius: 6px;
-          white-space: pre;
-          pointer-events: none;
-          opacity: 0;
-          transition: opacity 160ms ease, transform 160ms ease;
-          backdrop-filter: blur(6px);
+          display: inline-flex;
+          align-items: center;
+          gap: 8px;
+          max-width: 60ch;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          z-index: 50;
+          font-size: 0.9rem;
+          color: rgba(0,0,0,0.72);
+          pointer-events: auto;             /* still hoverable */
         }
-        .np-wrap:hover .tooltip {
-          opacity: 1;
-          transform: translateY(-50%) translateX(2px);
+
+        .thumb {
+          width: 18px;                      /* tiny album art */
+          height: 18px;
+          border-radius: 2px;
+          object-fit: cover;
+          display: block;
+          flex: 0 0 auto;
+        }
+
+        .title {
+          color: inherit;                   /* no blue */
+          text-decoration: none;
+          border-bottom: 1px solid rgba(0,0,0,0.15);
+          padding-bottom: 1px;
+        }
+        .title:hover { border-bottom-color: rgba(0,0,0,0.35); }
+        .muted { color: rgba(0,0,0,0.45); }
+
+        @keyframes np-spin {
+          from { transform: rotate(0deg); }
+          to   { transform: rotate(360deg); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .disk { animation: none !important; }
         }
       `}</style>
-    </div>
+    </span>
   );
 }
