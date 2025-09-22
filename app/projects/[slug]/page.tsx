@@ -11,7 +11,7 @@ const data: Record<string, { title: string; dek: string; body: string[] }> = {
   },
   'contraction-metrics': {
     title: 'Neural Stochastic Contraction Metrics at UTIAS',
-    dek: '-.',
+    dek: 'coming soon!',
     body: [
       '',
     ]

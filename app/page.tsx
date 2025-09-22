@@ -58,7 +58,7 @@ export default function Page() {
 
       </section>
 
-      <br /><br /><br /><br></br><br></br><br></br>
+      <br /><br /><br /><br></br><br></br>
       <p>
         site is still in progress.. feel free to contact me if you experience any bugs or have feedback!
       </p>
@@ -82,6 +82,7 @@ export default function Page() {
           ))}
         </div>
       </section>
+
     </>
   );
 }

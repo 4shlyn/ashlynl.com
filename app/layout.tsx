@@ -8,7 +8,6 @@ export const metadata = {
   description: 'Newspaper-styled portfolio with watercolor projects',
  icons: {
     icon: './favicon.png', 
-
   },
 };
 
@@ -20,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }){
         <main className="container">{children}</main>
         <ProjectReveals />
         <RouteWipe />
-        <footer className="site-footer container">© 2025 Ashlyn Lee — Printed on recycled CSS</footer>
+        <footer id="footer" className="site-footer container snap-end">© 2025 Ashlyn Lee — Printed on recycled CSS</footer>
       </body>
     </html>
   )
