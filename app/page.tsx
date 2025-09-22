@@ -54,15 +54,16 @@ export default function Page() {
           </div>
 
         </div>
+                  <ScrollHint targetId="projects" />
+
       </section>
 
       <br /><br /><br /><br></br><br></br><br></br>
       <p>
         site is still in progress.. feel free to contact me if you experience any bugs or have feedback!
       </p>
-          <ScrollHint targetId="projects-list" />
 
-      <section className="projects-mb">
+      <section id = "projects" className="projects-mb">
         <div className="kicker">Projects</div>
         <div className="proj-list">
           {projects.map((p) => (
