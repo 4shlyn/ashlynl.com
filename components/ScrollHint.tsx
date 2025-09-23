@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-export default function ScrollHint({ targetId = "projects" }: { targetId?: string }) {
+export default function ScrollHint({ targetId = "about" }: { targetId?: string }) {
   const [hidden, setHidden] = useState(false);
 
   useEffect(() => {

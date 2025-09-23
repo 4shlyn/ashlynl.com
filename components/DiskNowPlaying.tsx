@@ -21,9 +21,13 @@ export default function DiskNowPlaying() {
 
   async function fetchNowPlaying() {
     try {
-      const res = await fetch("/api/spotify/nowplaying", { cache: "no-store" });
+      // ✅ route name: now-playing (with a hyphen)
+      const res = await fetch("/api/spotify/now-playing", { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const json = (await res.json()) as NowPlaying;
       setData(json);
+    } catch {
+      // keep last known state (optional: setData({ isPlaying:false }))
     } finally {
       setLoaded(true);
     }
@@ -67,6 +71,7 @@ export default function DiskNowPlaying() {
       {/* ABSOLUTE popover so layout never shifts */}
       {hovered && (
         <span className="popover">
+          {/* show image ONLY when playing */}
           {isPlaying && data?.albumImageUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img className="thumb" src={data.albumImageUrl} alt="" />
@@ -82,23 +87,20 @@ export default function DiskNowPlaying() {
         </span>
       )}
 
-      {/* Scoped styles */}
       <style jsx>{`
         .np-rel {
-          position: relative;               /* anchor for absolute popover */
+          position: relative;
           display: inline-block;
-          line-height: 1;                   /* keeps the wrapper tight */
+          line-height: 1;
         }
         .disk {
           display: inline-block;
-          font-size: 18px;                  /* compact emoji */
+          font-size: 18px;
           transform-origin: 50% 50%;
         }
-
-        /* Popover styles (does NOT affect layout) */
         .popover {
           position: absolute;
-          left: 26px;                       /* ~ disk width + gap */
+          left: 26px;
           top: 50%;
           transform: translateY(-50%);
           display: inline-flex;
@@ -111,20 +113,18 @@ export default function DiskNowPlaying() {
           z-index: 50;
           font-size: 0.9rem;
           color: rgba(0,0,0,0.72);
-          pointer-events: auto;             /* still hoverable */
+          pointer-events: auto;
         }
-
         .thumb {
-          width: 18px;                      /* tiny album art */
-          height: 18px;
+          width: 12px;   /* ✅ smaller */
+          height: 12px;
           border-radius: 2px;
           object-fit: cover;
           display: block;
           flex: 0 0 auto;
         }
-
         .title {
-          color: inherit;                   /* no blue */
+          color: inherit;
           text-decoration: none;
           border-bottom: 1px solid rgba(0,0,0,0.15);
           padding-bottom: 1px;
@@ -132,14 +132,8 @@ export default function DiskNowPlaying() {
         .title:hover { border-bottom-color: rgba(0,0,0,0.35); }
         .muted { color: rgba(0,0,0,0.45); }
 
-        @keyframes np-spin {
-          from { transform: rotate(0deg); }
-          to   { transform: rotate(360deg); }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .disk { animation: none !important; }
-        }
+        @keyframes np-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @media (prefers-reduced-motion: reduce) { .disk { animation: none !important; } }
       `}</style>
     </span>
   );

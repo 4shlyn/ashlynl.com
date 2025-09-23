@@ -1,15 +1,24 @@
 const TOKEN_URL = "https://accounts.spotify.com/api/token";
 const NOW_PLAYING_URL = "https://api.spotify.com/v1/me/player/currently-playing";
 
+function env(key: string) {
+  const v = process.env[key];
+  if (!v) throw new Error(`Missing env: ${key}`);
+  return v.trim();
+}
+
 async function refreshAccessToken() {
+  const basic = Buffer.from(`${env("SPOTIFY_CLIENT_ID")}:${env("SPOTIFY_CLIENT_SECRET")}`).toString("base64");
+
   const res = await fetch(TOKEN_URL, {
     method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    headers: {
+      Authorization: `Basic ${basic}`,
+      "Content-Type": "application/x-www-form-urlencoded",
+    },
     body: new URLSearchParams({
       grant_type: "refresh_token",
-      refresh_token: process.env.SPOTIFY_REFRESH_TOKEN!,
-      client_id: process.env.SPOTIFY_CLIENT_ID!,
-      client_secret: process.env.SPOTIFY_CLIENT_SECRET!,
+      refresh_token: env("SPOTIFY_REFRESH_TOKEN"),
     }),
     cache: "no-store",
   });
@@ -22,34 +31,22 @@ async function refreshAccessToken() {
 }
 
 export async function getNowPlaying() {
-  const accessToken = await refreshAccessToken();
+  const token = await refreshAccessToken();
 
   const res = await fetch(NOW_PLAYING_URL, {
-    headers: { Authorization: `Bearer ${accessToken}` },
+    headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
 
-  // 204 = no content (not playing), 200 = playing
-  if (res.status === 204 || res.status > 400) {
-    return { isPlaying: false } as const;
-  }
+  if (res.status === 204 || res.status > 400) return { isPlaying: false } as const;
 
   const json = await res.json();
-
-  const isPlaying = json?.is_playing ?? false;
-  const item = json?.item ?? json; // sometimes nested
-  const title = item?.name ?? null;
-  const artist = item?.artists?.map((a: any) => a.name).join(", ") ?? null;
-  const album = item?.album?.name ?? null;
-  const albumImageUrl = item?.album?.images?.[0]?.url ?? null;
-  const songUrl = item?.external_urls?.spotify ?? null;
-
+  const item = json?.item ?? json;
   return {
-    isPlaying,
-    title,
-    artist,
-    album,
-    albumImageUrl,
-    songUrl,
+    isPlaying: Boolean(json?.is_playing),
+    title: item?.name ?? null,
+    artist: item?.artists?.map((a: any) => a.name).join(", ") ?? null,
+    albumImageUrl: item?.album?.images?.[0]?.url ?? null,
+    songUrl: item?.external_urls?.spotify ?? null,
   } as const;
 }

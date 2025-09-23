@@ -124,7 +124,6 @@ main { padding-top: 86px; }
 }
 .kicker::after { content: ""; flex: 1; height: 1px; background: var(--rule); }
 
-.projects-mb { /* normal flowing section (NOT full-screen so it won't look like a second footer) */ }
 #projects { scroll-margin-top: var(--scroll-offset); }
 
 .proj-list { display: grid; grid-template-columns: 1fr; gap: 40px; }
@@ -301,3 +300,96 @@ footer.site-footer { min-height: 100vh; }
 a{
   cursor:help;
 }
+
+
+
+/* page-level */
+html, body {
+  height: 100%;
+  margin: 0;
+  scroll-behavior: smooth;
+  scroll-snap-type: y mandatory;   /* was proximity */
+  scroll-padding-top: var(--navH, 64px);
+}
+
+/* sections that should snap */
+.hero { scroll-snap-align: start; min-height: 100vh; }
+#about { scroll-snap-align: start; min-height: 100vh; }
+
+/* add this so Projects also snaps */
+.projects-mb { scroll-snap-align: start; min-height: 100vh; }
+
+/* snap the footer; use 'end' if you want its bottom to lock to the bottom */
+footer.site-footer { scroll-snap-align: end; }
+/* --- About layout --- */
+.about {
+  /* optional faint corner glow similar to the reference */
+  background:
+    radial-gradient(800px 400px at 90% -20%, rgba(255, 192, 203, .10), transparent 60%),
+    radial-gradient(700px 380px at -10% 110%, rgba(180, 220, 255, .10), transparent 60%);
+}
+
+.about-wrap {
+  display: grid;
+  gap: 28px;
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .about-wrap {
+    grid-template-columns: 1fr 1.2fr;  /* image : copy */
+    gap: 40px;
+  }
+}
+
+/* Photo */
+.about-photo {
+  margin: 0;
+}
+.about-photo img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+  object-fit: cover;
+}
+
+/* Headline */
+.about-head {
+  margin: 4px 0 10px;
+  font-weight: 800;
+  font-size: clamp(26px, 4.2vw, 44px);
+  letter-spacing: -.012em;
+  line-height: 1.1;
+}
+.about-head span {
+  /* soft gradient text */
+  background: linear-gradient(90deg, #111 0%, #6b6b6b 60%, #111 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Body */
+.about-p {
+  margin: 10px 0 0;
+  color: #2a2a2a;
+  font-size: clamp(16px, 1.6vw, 19px);
+  line-height: 1.65;
+  max-width: 66ch;
+}
+.about-p em {
+  font-style: italic;
+  opacity: .95;
+}
+.about-p .accent {
+  font-weight: 800;
+  letter-spacing: -.006em;
+}
+.about-p.subtle {
+  color: var(--muted);
+}
+
+/* Keep your existing snap rules */
+#about { min-height: 85vh; scroll-snap-align: start; }

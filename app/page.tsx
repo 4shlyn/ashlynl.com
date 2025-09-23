@@ -2,7 +2,8 @@ import DiskNowPlaying from '@/components/DiskNowPlaying';
 import TitleBump from '@/components/TitleBump';
 import SmartLink from '@/components/SmartLink';
 import ScrollHint from "@/components/ScrollHint";
-
+import About from '@/components/About';
+import AttachFlowerToLastChar from '@/components/AttachFlowerToLastChar';
 // will switch to postgres later
 const projects = [
   {
@@ -38,30 +39,39 @@ const projects = [
 export default function Page() {
   return (
     <>
-      <section className="hero">
-        <div className="hero-inner">
-          <div className="hero-title">
-            <p className="intro-eyebrow">HEY! I’M</p>
-            <TitleBump text="Ashlyn Lee" />
-          </div>
-          <p className="tagline">
-            Rocketry • Avionics • Control •• Engineering Science @ UofT
-          </p>
+<section className="hero">
+  <div className="hero-inner">
+    {/* 👇 added relative + marker attribute */}
+    <div className="hero-title relative" data-title-bump>
+      <p className="intro-eyebrow">HEY! I’M</p>
+      <TitleBump text="Ashlyn Lee" />
 
-          <div className="mt-4">
-            <DiskNowPlaying />
-            
-          </div>
+      {/* 👇 Tiny flower overlay */}
+      <AttachFlowerToLastChar
+        // turn this on once to verify it's landing:
+        // debugDot
+        sizeFactor={0.7} // fraction of the letter size
+        nudgeX={-75}        // fine horizontal tweak in px
+        nudgeY={-45}       // fine vertical tweak in px
+      />
+    </div>
 
-        </div>
-                  <ScrollHint targetId="projects" />
-
-      </section>
+    <p className="tagline">
+      Rocketry • Avionics • Control •• Engineering Science @ UofT
+    </p>
+    <div className="mt-4">
+      <DiskNowPlaying />
+    </div>
+  </div>
+  <ScrollHint targetId="about" />
+</section>
 
       <br /><br /><br /><br></br><br></br>
       <p>
         site is still in progress.. feel free to contact me if you experience any bugs or have feedback!
       </p>
+
+      <About />
 
       <section id = "projects" className="projects-mb">
         <div className="kicker">Projects</div>
