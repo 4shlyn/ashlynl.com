@@ -45,15 +45,6 @@ export default function Page() {
     <div className="hero-title relative" data-title-bump>
       <p className="intro-eyebrow">HEY! I’M</p>
       <TitleBump text="Ashlyn Lee" />
-
-      {/* 👇 Tiny flower overlay */}
-      <AttachFlowerToLastChar
-        // turn this on once to verify it's landing:
-        // debugDot
-        sizeFactor={0.7} // fraction of the letter size
-        nudgeX={-75}        // fine horizontal tweak in px
-        nudgeY={-45}       // fine vertical tweak in px
-      />
     </div>
 
     <p className="tagline">
@@ -63,7 +54,7 @@ export default function Page() {
       <DiskNowPlaying />
     </div>
   </div>
-  <ScrollHint targetId="about" />
+  <ScrollHint targetId="projects" />
 </section>
 
       <br /><br /><br /><br></br><br></br>
@@ -71,7 +62,7 @@ export default function Page() {
         site is still in progress.. feel free to contact me if you experience any bugs or have feedback!
       </p>
 
-      <About />
+      {/* <About /> */}
 
       <section id = "projects" className="projects-mb">
         <div className="kicker">Projects</div>

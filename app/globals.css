@@ -317,7 +317,7 @@ html, body {
 #about { scroll-snap-align: start; min-height: 100vh; }
 
 /* add this so Projects also snaps */
-.projects-mb { scroll-snap-align: start; min-height: 100vh; }
+.projects-mb { scroll-snap-align: start; min-height: 60vh; }
 
 /* snap the footer; use 'end' if you want its bottom to lock to the bottom */
 footer.site-footer { scroll-snap-align: end; }
