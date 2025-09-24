@@ -131,6 +131,12 @@ main { padding-top: calc(var(--navH) + 22px); }
   letter-spacing: .14em; text-transform: uppercase;
 }
 
+.tagline-bold{
+    color: rgb(0, 37, 147);
+  font-family: "IBM Plex Mono", monospace; font-weight: 1000; font-size: 11px;
+  letter-spacing: .14em; text-transform: uppercase;
+
+}
 /* ---------- Projects ---------- */
 #projects{
   position: relative;
@@ -317,7 +323,7 @@ img.wash-img.reveal { opacity: 1; transform: none; }
   margin: 0 auto;
   padding: 0 1rem;
   display: grid;
-  grid-template-columns: minmax(280px, 480px) 1fr;
+  grid-template-columns: minmax(120px, 300px) 1fr;
   grid-gap: clamp(20px, 3vw, 44px);
   gap: clamp(20px, 3vw, 44px);
   align-items: start;
@@ -333,7 +339,7 @@ img.wash-img.reveal { opacity: 1; transform: none; }
     transform: translateX(-22px);
   }
 }
-@media (max-width: 919.98px) {
+@media (max-width: 700px) {
   .about-grid { grid-template-columns: 1fr; }
   .about-grid::before { display: none; }
 }
@@ -344,7 +350,7 @@ img.wash-img.reveal { opacity: 1; transform: none; }
   border-radius: 10px; border: 1px solid #e6e6e6;
 }
 
-.about-text { max-width: 64ch; }
+.about-text { max-width: 96ch; }
 .about-title {
   font-family: "Newsreader", Georgia, serif;
   font-weight: 800;

@@ -73,14 +73,20 @@ export default function DiskNowPlaying() {
         <span className="popover">
           {/* show image ONLY when playing */}
           {isPlaying && data?.albumImageUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img className="thumb" src={data.albumImageUrl} alt="" />
+            <>
+            {/* <p>I'm listening to...</p> */}
+                        <img className="thumb" src={data.albumImageUrl} alt="" />
+
+            </>
           ) : null}
 
           {isPlaying && data?.songUrl ? (
+            <>
             <a className="title" href={data.songUrl} target="_blank" rel="noreferrer">
               {label}
             </a>
+            </>
+
           ) : (
             <span className="muted">{label}</span>
           )}
@@ -116,8 +122,8 @@ export default function DiskNowPlaying() {
           pointer-events: auto;
         }
         .thumb {
-          width: 12px;   /* ✅ smaller */
-          height: 12px;
+          width: 16px; 
+          height: 16px;
           border-radius: 2px;
           object-fit: cover;
           display: block;

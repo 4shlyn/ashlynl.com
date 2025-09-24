@@ -20,7 +20,7 @@ const projects = [
     slug: "contraction-metrics",
     title: "Neural Stochastic Contraction Metrics",
     desc: "Conducted unguided learning on a stochastic pendulum system, coded a CCM for exponential stabilization opimtization using derived contraction metric.",
-    image: "/assets/watercolor2.png",
+    image: "/assets/UTIAS.png",
     tag: "Control, Machine Learning"
   },
   {
@@ -72,8 +72,8 @@ export default function Page() {
           <p className="tagline">
             Rocketry • Avionics • Control •• Engineering Science @ UofT
           </p>
-                    <p className="tagline">
-Site is still under development!          </p>
+                    <p className="tagline-bold">
+              Site is still in development!          </p>
           <div className="mt-4">
             <DiskNowPlaying />
           </div>
