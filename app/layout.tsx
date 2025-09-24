@@ -2,7 +2,7 @@ import './globals.css';
 import Navbar from '../components/Navbar';
 import RouteWipe from '../components/RouteWipe';
 import ProjectReveals from '../components/ProjectReveals';
-
+import Footer from '../components/Footer';
 export const metadata = {
   title: 'Ashlyn Lee — Portfolio',
   description: 'Newspaper-styled portfolio with watercolor projects',
@@ -19,7 +19,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }){
         <main className="container">{children}</main>
         <ProjectReveals />
         <RouteWipe />
-        <footer id="footer" className="site-footer container snap-end">© 2025 Ashlyn Lee — Printed on recycled CSS</footer>
+        <Footer />
       </body>
     </html>
   )

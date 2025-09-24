@@ -10,8 +10,12 @@ export default function Navbar(){
           <div className="edition">EDITION I</div>
         </div>
         <nav className="navlinks">
-          <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" className="btn-resume">Resume</a>
+          <a href="/#about">About</a>
+          <a href="/#projects">Projects</a>
           <SmartLink href="/blog">Blog</SmartLink>
+          <a href="/resume.pdf" target="_blank" rel="noopener noreferrer" className="btn-resume">Resume</a>
+   
+          
         </nav>
       </div>
     </div>
