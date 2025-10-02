@@ -21,7 +21,7 @@ export default function About() {
           <h2 className="about-title">
             Interested in systems that fly & think. 
           </h2>
-          <p className="about-lede"> Curiosity carries me into many spaces—building rocketry avionics, exploring control and machine learning, and experimenting with day trading on the side. It also takes me offline: making music on the oboe, hand-making double reeds, or chasing fresh air on mountains and trails.
+          <p className="about-lede"> Curiosity carries me into many spaces—building rocketry avionics, exploring drone stability controls with machine learning, 3D objection detection for formula cars. It also takes me offline: making music on the oboe, hand-making double reeds, or chasing fresh air on mountains and trails.
           </p>
 
           <p className="about-lede">
